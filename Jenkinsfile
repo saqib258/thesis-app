@@ -7,13 +7,12 @@ pipeline {
         DOCKER_IMAGE = "saqib/thesis-app:latest"
     }
 
-    stages {
-        stage('Checkout') {
-            steps {
-                // Pulling directly from your local repository folder
-                sh 'cp -r /opt/thesis-app/* .'
-            }
-        }
+    stage('Checkout') {
+    steps {
+        // This pulls the code automatically from GitHub
+        checkout scm 
+    }
+}
 
         stage('Maven Build & SCA Scan') {
             steps {
