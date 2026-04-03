@@ -1,11 +1,8 @@
-package com.saqib.app;
-
-import java.util.logging.Logger;
+package com.saqib.app; // This MUST match the folder name
 
 public class App {
-    private static final Logger logger = Logger.getLogger(App.class.getName());
-
     public static void main(String[] args) {
-        logger.info("Hello World! Jenkins Pipeline is working.");
+        // We will keep it simple to ensure the test still works
+        System.out.println("Hello Saqib, Pipeline is working!"); 
     }
 }
