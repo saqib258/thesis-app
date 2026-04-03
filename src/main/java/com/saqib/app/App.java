@@ -1,7 +1,11 @@
-package com.example;
+package com.saqib.app;
+
+import java.util.logging.Logger;
 
 public class App {
+    private static final Logger logger = Logger.getLogger(App.class.getName());
+
     public static void main(String[] args) {
-        System.out.println("Hello World! i have updated my thesis-app folder. this folder was empty before.");
+        logger.info("Hello World! Jenkins Pipeline is working.");
     }
 }
