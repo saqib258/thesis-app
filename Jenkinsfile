@@ -1,9 +1,16 @@
 pipeline {
     agent any
 
+    environment {
+        // Defining variables for easier management
+        SONAR_URL = "http://100.31.224.64:9000"
+        DOCKER_IMAGE = "saqib/thesis-app:latest"
+    }
+
     stages {
         stage('Checkout') {
             steps {
+                // Pulling directly from your local repository folder
                 sh 'cp -r /opt/thesis-app/* .'
             }
         }
@@ -16,26 +23,57 @@ pipeline {
 
         stage('SonarQube Analysis') {
             steps {
-                // Using the credential ID we discussed
-                withCredentials([string(credentialsId: 'sonar-token-for-thesis-app', variable: 'SONAR_AUTH')]) {
-                    sh "mvn sonar:sonar -Dsonar.login=${SONAR_AUTH} -Dsonar.host.url=http://100.31.224.64:9000 -Dsonar.projectKey=Final-Thesis-App"
+                // Using the specific Jenkins-SonarQube integration for the icon/badge
+                withSonarQubeEnv('SonarQubeServer') { 
+                    withCredentials([string(credentialsId: 'sonar-token-for-thesis-app', variable: 'SONAR_AUTH')]) {
+                        sh "mvn sonar:sonar \
+                            -Dsonar.login=${SONAR_AUTH} \
+                            -Dsonar.host.url=${SONAR_URL} \
+                            -Dsonar.projectKey=Final-Thesis-App"
+                    }
+                }
+            }
+        }
+        
+        stage('Quality Gate') {
+            steps {
+                // This ensures the pipeline waits for SonarQube to finish and show the icon
+                timeout(time: 1, unit: 'HOURS') {
+                    waitForQualityGate abortPipeline: true
                 }
             }
         }
 
-        /* stage('Trivy File Scan') {
+        stage('Trivy FS Scan') {
             steps {
-                sh 'trivy fs .'
+                sh 'trivy fs --severity HIGH,CRITICAL .'
             }
-        } 
-        */
-        
-        // You can also comment out Docker if you aren't ready for it yet
+        }
+
+        stage('Docker Build & Image Scan') {
+            steps {
+                script {
+                    // Building the image using the Dockerfile in your repo
+                    sh "docker build -t ${DOCKER_IMAGE} ."
+                    
+                    // Scanning the built image before finishing
+                    sh "trivy image --severity HIGH,CRITICAL ${DOCKER_IMAGE}"
+                }
+            }
+        }
     }
 
     post {
         always {
             echo 'Pipeline Execution Finished.'
+            // Optional: Clean up workspace to save EC2 space
+            // cleanWs()
+        }
+        success {
+            echo 'Thesis Application built and scanned successfully!'
+        }
+        failure {
+            echo 'Pipeline failed. Check SonarQube or Trivy logs.'
         }
     }
 }
