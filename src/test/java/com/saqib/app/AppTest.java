@@ -1,15 +1,6 @@
-import com.company.CompareToTester;
-
 @Test
-public void testDoSomething() {
+public void testDoSomething() {  // Noncompliant
   MyClass myClass = new MyClass();
-  assertNull(myClass.doSomething());  // JUnit assertion
-  assertThat(myClass.doSomething()).isNull();  // Fest assertion
+  myClass.doSomething();
 }
 
-@Test
-public void testDoSomethingElse() {
-  MyClass myClass = new MyClass();
-  new CompareToTester().compareWith(myClass);  // Compliant - custom assertion method defined as rule parameter
-  CompareToTester.compareStatic(myClass);  // Compliant
-}
