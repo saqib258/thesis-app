@@ -1,9 +1,9 @@
 package com.saqib.app;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-public class AppTest {
+ class AppTest {
     @Test
-    public void testApp() {
+     void testApp() {
         assertTrue(true);
     }
 }
