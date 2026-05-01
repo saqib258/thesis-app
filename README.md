@@ -4,3 +4,4 @@ i have updated jenkins manual to auto trigering when any commit has happend. jen
 hello check jenkins automation
 checking 
 hi
+want to check pipeline
