@@ -21,14 +21,19 @@ pipeline {
         }
 
         stage('SonarQube Analysis') {
-            steps {
-                withSonarQubeEnv('SonarQubeServer') { 
-                    withCredentials([string(credentialsId: 'sonar-token-for-thesis-app', variable: 'SONAR_AUTH')]) {
-                        sh "mvn sonar:sonar -Dsonar.login=${SONAR_AUTH} -Dsonar.host.url=${SONAR_URL} -Dsonar.projectKey=Final-Thesis-App"
-                    }
-                }
+    steps {
+        withSonarQubeEnv('SonarQubeServer') {
+            withCredentials([string(credentialsId: 'sonar-token-for-thesis-app', variable: 'SONAR_AUTH')]) {
+                sh '''
+                mvn sonar:sonar \
+                -Dsonar.login=$SONAR_AUTH \
+                -Dsonar.projectKey=Final-Thesis-App
+                '''
             }
         }
+    }
+} 
+                    
         
         stage('Quality Gate') {
             steps {
