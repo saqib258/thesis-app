@@ -1,11 +1,15 @@
 package com.saqib.app;
+
 import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.assertTrue;
- class AppTest {
+
+class AppTest {
+
     @Test
-     void testApp() {
-        assertTrue(true);
+    void testMainMethodRuns() {
+        // Call the main method with empty arguments
+        App.main(new String[]{});
     }
 }
+
 
 
