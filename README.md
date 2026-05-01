@@ -5,3 +5,4 @@ hello check jenkins automation
 checking 
 hi
 want to check pipeline
+check trigger
