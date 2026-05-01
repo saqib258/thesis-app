@@ -1,73 +1,73 @@
-pipeline {
-    agent any
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 
+                             http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
 
-    environment {
-        SONAR_URL = "http://100.31.224.64:9000"
-        DOCKER_IMAGE = "saqib/thesis-app:latest"
-    }
+    <groupId>com.saqib.app</groupId>
+    <artifactId>my-secure-app</artifactId>
+    <version>1.0-SNAPSHOT</version>
 
-    stages {
-        stage('Checkout') {
-            steps {
-                // This pulls code from the GitHub URL you set in Jenkins
-                checkout scm
-            }
-        }
+    <properties>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
+        <!-- SonarQube project key -->
+        <sonar.projectKey>Final-Thesis-App</sonar.projectKey>
+    </properties>
 
-        stage('Maven Build & SCA Scan') {
-            steps {
-                sh 'mvn clean verify'
-            }
-        }
+    <dependencies>
+        <!-- JUnit 5 -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+            <version>5.10.0</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <version>5.10.0</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
 
-        stage('SonarQube Analysis') {
-    steps {
-        withSonarQubeEnv('SonarQubeServer') {
-            withCredentials([string(credentialsId: 'sonar-token-for-thesis-app', variable: 'SONAR_AUTH')]) {
-                sh '''
-                mvn sonar:sonar \
-                -Dsonar.login=$SONAR_AUTH \
-                -Dsonar.projectKey=Final-Thesis-App
-                '''
-            }
-        }
-    }
-} 
-                    
-        
-        stage('Quality Gate') {
-            steps {
-                timeout(time: 1, unit: 'HOURS') {
-                    waitForQualityGate abortPipeline: true
-                }
-            }
-        }
+    <build>
+        <plugins>
+            <!-- Jacoco plugin for coverage -->
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>0.8.8</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>report</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>report</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
 
-        stage('Trivy FS Scan') {
-            steps {
-                sh 'trivy fs --severity HIGH,CRITICAL .'
-            }
-        }
+            <!-- Surefire plugin to run tests -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.0.0-M7</version>
+            </plugin>
 
-        stage('Docker Build & Image Scan') {
-            steps {
-                script {
-                    sh "docker build -t ${DOCKER_IMAGE} ."
-                    sh "trivy image --severity HIGH,CRITICAL ${DOCKER_IMAGE}"
-                }
-            }
-        }
-    }
+            <!-- SonarQube plugin -->
+            <plugin>
+                <groupId>org.sonarsource.scanner.maven</groupId>
+                <artifactId>sonar-maven-plugin</artifactId>
+                <version>3.9.1.2184</version>
+            </plugin>
+        </plugins>
+    </build>
+</project>
 
-    post {
-        always {
-            echo 'Pipeline Execution Finished.'
-        }
-        success {
-            echo 'Thesis Application built and scanned successfully!'
-        }
-        failure {
-            echo 'Pipeline failed. Check SonarQube or Trivy logs.'
-        }
-    }
-}
